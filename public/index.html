@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    
+    <link rel="stylesheet" href="index.css">
+    <title>JSON Formatter</title>
+
+  <script src="//fb.me/react-0.12.2.min.js"></script>
+  <script src="//fb.me/JSXTransformer-0.12.2.js"></script>
+
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <h1>JSON formatter</h1>
+
+  <div id="formatter"></div>
+
+  <script type="text/jsx">
+    (function() {
+      var Formatter = React.createClass({
+
+        getInitialState: function() {
+          return {
+            inputText: '{"One":1,"Two":2,"Three":[1,2,3]}',
+            indent:    '2'
+          };
+        },
+
+        render: function() {
+          return (
+            <div>
+
+              <textarea
+                value={this.state.inputText}
+                onChange={this.onInputTextChange}
+                placeholder="Paste your JSON here"
+                autofocus="true" />
+
+              <button onClick={this.clearInputText}>Clear Input Text</button>
+
+              <FormattedJSON
+                inputText={this.state.inputText}
+                indent={this.state.indent} />
+
+              <div className="indentation">
+                Indentation:
+                <select
+                  value={this.state.indent}
+                  onChange={this.onIndentationChange}
+                >
+                  <option value="0">No spaces</option>
+                  <option value="1">One space</option>
+                  <option value="2">Two spaces</option>
+                  <option value="3">Three spaces</option>
+                  <option value="4">Four spaces</option>
+                  <option value="8">Eight spaces</option>
+                  <option value="TAB">Tabs</option>
+                </select>
+              </div>
+
+            </div>
+          );
+        },
+
+        clearInputText: function() {
+          this.setState({'inputText': ''});
+        },
+
+        onInputTextChange: function(event) {
+          this.setState({'inputText': event.target.value});
+        },
+
+        onIndentationChange: function(event) {
+          this.setState({'indent' : event.target.value});
+        }
+      });
+
+      var FormattedJSON = React.createClass({
+        propTypes: function() {
+          return {
+            'inputText': React.PropTypes.string.isRequired,
+            'indent': React.Proptypes.string.isRequired
+          }
+        },
+
+        render: function() {
+          var outputText, outputClass;
+
+          try {
+            var indent = this.props.indent;
+            var space = (indent === 'TAB') ? '\t' : parseInt(indent);
+
+            outputText = this.formatJSON(this.props.inputText, space);
+            outputClass = 'output-good';
+          }
+          catch (err) {
+            // JSON.parse threw an exception
+            outputText = err.message;
+            outputClass = 'output-error';
+          }
+
+          return (
+            <textarea
+              value={outputText}
+              className={outputClass}
+              readOnly="true"
+              placeholder="Reformatted JSON will appear here" />
+          );
+        },
+
+        formatJSON: function(input, space) {
+          if (input.length == 0) {
+            return '';
+          }
+          else {
+            var parsedData = JSON.parse(input);
+            return JSON.stringify(parsedData, null, space);
+          }
+        }
+      });
+
+      React.render(<Formatter />, document.getElementById('formatter'));
+    })();
+  </script>
+    
+  </body>
+</html>
